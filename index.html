@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waffly’s Wafer Bakery - Freeze vs Melt Phonics</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        freeze: {
+                            light: '#e0f2fe',
+                            DEFAULT: '#0284c7',
+                            dark: '#0369a1',
+                            accent: '#38bdf8'
+                        },
+                        melt: {
+                            light: '#fce7f3',
+                            DEFAULT: '#db2777',
+                            dark: '#be185d',
+                            accent: '#f472b6'
+                        },
+                        wafer: {
+                            bg: '#fdf8f0',
+                            card: '#ffffff',
+                            accent: '#d97706',
+                            gold: '#f59e0b',
+                            warm: '#b45309',
+                            soft: '#fef3c7'
+                        }
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        quicksand: ['Quicksand', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Fredoka', 'Quicksand', sans-serif;
+            background-color: #faf4eb;
+        }
+
+        /* Ice Cream & Wafer Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
+        }
+
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes freezePulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(56, 189, 248, 0.8); }
+        }
+
+        .freeze-active {
+            animation: freezePulse 2s infinite;
+        }
+
+        /* Audio Wave Visualizer */
+        .wave-bar {
+            transition: height 0.05s ease;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fdf3e7;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d97706;
+            border-radius: 10px;
+        }
+
+        /* Year 1 Articulation & Airflow Keyframe Animations */
+        @keyframes tongueTapAnimation {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            35% { transform: translateY(-10px) rotate(-4deg); }
+            55% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        @keyframes lipPuckerPop {
+            0%, 100% { transform: scale(1); }
+            35% { transform: scaleY(0.4) scaleX(1.1); }
+            50% { transform: scale(1.18); }
+            65% { transform: scale(1); }
+        }
+
+        @keyframes backTongueLift {
+            0%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-9px) scaleY(1.08); }
+            60% { transform: translateY(0); }
+        }
+
+        @keyframes continuousAirflow {
+            0% { stroke-dashoffset: 40; }
+            100% { stroke-dashoffset: 0; }
+        }
+
+        @keyframes noseAirPulse {
+            0% { transform: translate(0, 0) scale(0.6); opacity: 0.2; }
+            50% { transform: translate(10px, -8px) scale(1.3); opacity: 1; }
+            100% { transform: translate(20px, -16px) scale(0.8); opacity: 0; }
+        }
+
+        @keyframes freezeBurstPulse {
+            0%, 100% { transform: scale(0.7); opacity: 0.2; }
+            35% { transform: scale(1.5); opacity: 1; }
+            60% { transform: scale(0.9); opacity: 0.4; }
+        }
+
+        @keyframes glowSpotPulse {
+            0%, 100% { filter: drop-shadow(0 0 2px #38bdf8); }
+            50% { filter: drop-shadow(0 0 10px #0284c7); }
+        }
+
+        .anim-tongue-tap { animation: tongueTapAnimation 1.6s infinite ease-in-out; transform-origin: center bottom; }
+        .anim-lip-pop { animation: lipPuckerPop 1.6s infinite ease-in-out; transform-origin: center; }
+        .anim-back-tongue { animation: backTongueLift 1.6s infinite ease-in-out; transform-origin: center bottom; }
+        .anim-air-stream { stroke-dasharray: 8 4; animation: continuousAirflow 1s infinite linear; }
+        .anim-nose-air { animation: noseAirPulse 1.5s infinite ease-in-out; }
+        .anim-freeze-burst { animation: freezeBurstPulse 1.6s infinite ease-in-out; transform-origin: center; }
+        .anim-glow-spot { animation: glowSpotPulse 1.5s infinite ease-in-out; }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col justify-between selection:bg-amber-200">
+
+    <!-- TOP WAFER BAKERY NAVBAR -->
+    <header class="bg-white/95 backdrop-blur-md border-b-4 border-amber-500 shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
+            
+            <!-- Brand Logo & Chef Waffly Bear Mascot -->
+            <div class="flex items-center gap-3">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-300 via-amber-100 to-amber-200 flex items-center justify-center p-1 shadow-md border-2 border-amber-400 transform hover:scale-105 transition">
+                    <!-- Kawaii Waffly Bear Chef SVG -->
+                    <svg viewBox="0 0 120 120" class="w-full h-full drop-shadow">
+                        <!-- Ears -->
+                        <circle cx="35" cy="35" r="14" fill="#C68B59" stroke="#5D3A1A" stroke-width="2.5"/>
+                        <circle cx="35" cy="35" r="8" fill="#F8B195"/>
+                        <circle cx="85" cy="35" r="14" fill="#C68B59" stroke="#5D3A1A" stroke-width="2.5"/>
+                        <circle cx="85" cy="35" r="8" fill="#F8B195"/>
+                        <!-- Head -->
+                        <ellipse cx="60" cy="62" rx="36" ry="32" fill="#C68B59" stroke="#5D3A1A" stroke-width="2.5"/>
+                        <!-- Muzzle -->
+                        <ellipse cx="60" cy="69" rx="16" ry="12" fill="#FFF5E4"/>
+                        <ellipse cx="60" cy="64" rx="5" ry="3.5" fill="#4A2E15"/>
+                        <path d="M 55 69 Q 60 74 65 69" fill="none" stroke="#4A2E15" stroke-width="2" stroke-linecap="round"/>
+                        <!-- Eyes -->
+                        <circle cx="46" cy="58" r="4.5" fill="#2C1810"/>
+                        <circle cx="44.5" cy="56.5" r="1.5" fill="#FFFFFF"/>
+                        <circle cx="74" cy="58" r="4.5" fill="#2C1810"/>
+                        <circle cx="72.5" cy="56.5" r="1.5" fill="#FFFFFF"/>
+                        <!-- Cheeks -->
+                        <ellipse cx="38" cy="66" rx="6" ry="4" fill="#FF8B94" opacity="0.8"/>
+                        <ellipse cx="82" cy="66" rx="6" ry="4" fill="#FF8B94" opacity="0.8"/>
+                        <!-- Chef Hat -->
+                        <path d="M 38 36 C 38 18, 50 14, 60 14 C 70 14, 82 18, 82 36 Z" fill="#FFFFFF" stroke="#5D3A1A" stroke-width="2"/>
+                        <path d="M 39 33 Q 60 29 81 33" stroke="#FF8B94" stroke-width="4" fill="none"/>
+                        <!-- Wafer Stick -->
+                        <g transform="rotate(-25 92 75)">
+                            <rect x="85" y="50" width="8" height="35" rx="4" fill="#E2A970" stroke="#5D3A1A" stroke-width="1.5"/>
+                            <path d="M 85 58 L 93 63 M 85 68 L 93 73 M 85 78 L 93 83" stroke="#6B3E26" stroke-width="2"/>
+                        </g>
+                        <circle cx="84" cy="74" r="6" fill="#C68B59" stroke="#5D3A1A" stroke-width="1.5"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black tracking-wide text-amber-950 flex items-center gap-2">
+                        Waffly’s Wafer Bakery 🧇
+                        <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2.5 py-0.5 rounded-full border border-amber-300">With Chef Waffly 🐻</span>
+                    </h1>
+                    <p class="text-xs text-amber-800 font-semibold">Master Stop Plosive Freeze Wafers ❄️ vs Smooth Melt Sundaes 🍦</p>
+                </div>
+            </div>
+
+            <!-- Active Mode Badge -->
+            <div class="hidden sm:flex items-center bg-amber-100 border border-amber-300 px-3.5 py-1.5 rounded-2xl text-amber-900 font-bold text-xs gap-2">
+                <i class="fa-solid fa-cookie-bite text-amber-600"></i> Scoop & Sort Bakery Game
+            </div>
+
+            <!-- Score & Stats -->
+            <div class="flex items-center gap-2.5">
+                <div class="bg-amber-50 border border-amber-200 px-3 py-1 rounded-xl flex items-center gap-2">
+                    <span class="text-lg">🧇</span>
+                    <div>
+                        <div class="text-[9px] uppercase font-bold text-amber-700">Wafer Stars</div>
+                        <div id="scoreDisplay" class="text-base font-bold text-amber-950 leading-none">0</div>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 px-3 py-1 rounded-xl flex items-center gap-2">
+                    <span class="text-lg">🔥</span>
+                    <div>
+                        <div class="text-[9px] uppercase font-bold text-blue-700">Streak</div>
+                        <div id="streakDisplay" class="text-base font-bold text-blue-950 leading-none">0</div>
+                    </div>
+                </div>
+
+                <button id="audioToggleBtn" onclick="toggleAudioSynth()" class="w-9 h-9 rounded-xl bg-amber-100 hover:bg-amber-200 flex items-center justify-center text-amber-900 transition">
+                    <i id="audioIcon" class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APP WRAPPER -->
+    <main class="max-w-7xl mx-auto w-full px-4 py-5 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        
+        <!-- LEFT COLUMN: CAMERA SCREEN & ARTICULATION GUIDE (5 cols) -->
+        <section class="lg:col-span-5 flex flex-col gap-4 sticky top-20">
+            
+            <!-- CAMERA & AUDIO ANALYZER BOX -->
+            <div class="bg-white rounded-3xl p-3.5 shadow-lg border-3 border-amber-300 relative overflow-hidden">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="relative flex h-3 w-3">
+                          <span id="camStatusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span id="camStatusDot" class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                        </span>
+                        <h2 class="font-bold text-amber-950 text-xs tracking-wide uppercase">Pupil Pronunciation Mirror</h2>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="toggleWebcam()" class="text-[11px] bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-2.5 py-0.5 rounded-lg transition">
+                            <i class="fa-solid fa-camera"></i> Cam
+                        </button>
+                        <button onclick="toggleMirrorMode()" class="text-[11px] bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-lg transition" title="Flip Video Horizontal">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Video Viewport / Fallback Avatar -->
+                <div class="relative aspect-video bg-slate-900 rounded-2xl overflow-hidden flex items-center justify-center shadow-inner">
+                    <video id="webcamVideo" class="w-full h-full object-cover transform -scale-x-100" autoplay playsinline muted></video>
+
+                    <!-- Fallback Avatar Canvas (When webcam is disabled/unavailable) -->
+                    <div id="camFallback" class="absolute inset-0 bg-gradient-to-br from-amber-950 via-amber-900 to-slate-900 flex flex-col items-center justify-center p-3 text-center hidden">
+                        <canvas id="avatarCanvas" width="180" height="130" class="mb-1"></canvas>
+                        <p class="text-[11px] text-amber-200 font-semibold">Virtual Articulation Mirror Active</p>
+                        <button onclick="requestCameraAccess()" class="mt-1.5 text-[11px] bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1 rounded-full shadow transition">
+                            <i class="fa-solid fa-video mr-1"></i> Enable Camera
+                        </button>
+                    </div>
+
+                    <!-- Target Mouth Overlay Guide -->
+                    <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+                        <div class="w-44 h-28 border-2 border-dashed border-amber-300/60 rounded-full flex items-center justify-center">
+                            <span class="text-[9px] font-bold text-amber-200 bg-black/50 px-2 py-0.5 rounded-full backdrop-blur-sm">Align Mouth Here</span>
+                        </div>
+                    </div>
+
+                    <!-- Realtime Mic Amplitude Visualizer Bar -->
+                    <div class="absolute bottom-2 left-2 right-2 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-xl flex items-center gap-2 border border-white/10">
+                        <i class="fa-solid fa-microphone text-amber-400 text-xs"></i>
+                        <div class="flex-grow flex items-center gap-0.5 h-3.5" id="audioWaveContainer">
+                            <!-- Bars generated by JS -->
+                        </div>
+                        <span id="micVolText" class="text-[9px] font-mono text-emerald-400 font-bold">Mic Ready</span>
+                    </div>
+                </div>
+
+                <!-- SPEECH PRACTICE CONTROL WITH DYNAMIC WORD RECOGNITION -->
+                <div class="mt-2.5 flex flex-col gap-1.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <button id="btnListenSpeech" onclick="listenToPupil()" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-2 px-3 rounded-xl shadow transition flex items-center justify-center gap-2 text-xs">
+                            <i class="fa-solid fa-microphone-lines text-base"></i>
+                            <span id="listenBtnText">Practice Speaking (Say Flashcard Word!)</span>
+                        </button>
+                        <button onclick="playTargetSoundSample()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold p-2 rounded-xl transition" title="Listen to Pure Phoneme Sound">
+                            <i class="fa-solid fa-volume-high text-base"></i>
+                        </button>
+                    </div>
+                    <div class="text-[10px] text-amber-800 text-center font-semibold bg-amber-50 p-1 rounded-lg border border-amber-200">
+                        💡 <b>Tip:</b> Say <i>ANY</i> flashcard word (e.g. "Cat", "Cup", "Sun", "Box", "Van") to instantly switch target cards!
+                    </div>
+                </div>
+            </div>
+
+            <!-- BESIDE SCREEN ARTICULATION REFERENCE & PHONEME SELECTOR LIST -->
+            <div id="articulationSideCard" class="bg-white rounded-3xl p-3.5 shadow-lg border-2 border-amber-200 transition-all space-y-3">
+                
+                <!-- Active Target Header -->
+                <div class="flex items-center justify-between border-b border-amber-100 pb-2">
+                    <div class="flex items-center gap-2">
+                        <span id="sideCardBadge" class="text-xl px-2 py-0.5 rounded-xl bg-sky-100 text-sky-700 font-bold">❄️</span>
+                        <div>
+                            <h3 id="sidePhonemeTitle" class="font-black text-base text-amber-950 leading-none">Sound Target: /t/</h3>
+                            <span id="sideCategoryLabel" class="text-[10px] font-bold text-sky-600 uppercase tracking-wider">Freeze Wafer (Stop Sound)</span>
+                        </div>
+                    </div>
+                    <span id="sideLetterCount" class="text-[10px] font-bold text-sky-700 bg-sky-100 px-2 py-0.5 rounded-full">6 Freeze Letters</span>
+                </div>
+
+                <!-- Anatomical Diagram & Mechanics -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-center">
+                    <div class="bg-amber-50/60 rounded-2xl p-2 border border-amber-200/80 flex flex-col items-center justify-center relative">
+                        <div id="svgMouthWrapper" class="w-28 h-28 flex items-center justify-center">
+                            <!-- Dynamic SVG Articulation Diagram rendered by JS -->
+                        </div>
+                        <div class="flex items-center gap-1 mt-1">
+                            <button onclick="triggerMouthAnimation()" class="text-[9px] bg-amber-200 hover:bg-amber-300 text-amber-900 font-bold px-2 py-0.5 rounded-full transition flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-play text-[7px]"></i> Play Articulation Motion
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5 text-xs">
+                        <div class="bg-amber-50/40 p-2 rounded-xl border border-amber-100">
+                            <div class="font-bold text-amber-800 text-[8px] uppercase">Target Action</div>
+                            <div id="sideTargetText" class="font-bold text-amber-950 text-xs flex items-center gap-1 mt-0.5">
+                                👅 Tongue on teeth ridge
+                            </div>
+                        </div>
+
+                        <div class="bg-amber-50/40 p-2 rounded-xl border border-amber-100">
+                            <div class="font-bold text-amber-800 text-[8px] uppercase">Airflow Rule</div>
+                            <div id="sideAirflowText" class="text-[10px] font-medium text-slate-700 leading-snug mt-0.5">
+                                Air stopped abruptly by tongue tip on alveolar ridge.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SIDE PHONEME SELECTOR LIST (Divided into Freeze & Melt) -->
+                <div class="pt-2 border-t border-amber-100 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-black text-amber-950 uppercase tracking-wider">Phoneme Quick Select</span>
+                        <span class="text-[9px] text-amber-700">Click sound to test</span>
+                    </div>
+
+                    <!-- ❄️ Freeze Scoops List -->
+                    <div class="bg-sky-50/70 p-2 rounded-2xl border border-sky-200">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-extrabold text-sky-900 flex items-center gap-1">
+                                ❄️ Freeze Scoops <span class="text-[8px] text-sky-600 font-normal">(Stop Sounds)</span>
+                            </span>
+                            <span class="text-[8px] bg-sky-200 text-sky-800 font-bold px-1.5 py-0.2 rounded">6 Letters</span>
+                        </div>
+                        <div id="sideFreezeList" class="grid grid-cols-3 gap-1">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+
+                    <!-- 🍦 Melt Scoops List -->
+                    <div class="bg-pink-50/70 p-2 rounded-2xl border border-pink-200">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-extrabold text-pink-900 flex items-center gap-1">
+                                🍦 Melt Scoops <span class="text-[8px] text-pink-600 font-normal">(Continuous / Nasal)</span>
+                            </span>
+                            <span class="text-[8px] bg-pink-200 text-pink-800 font-bold px-1.5 py-0.2 rounded">7 Letters</span>
+                        </div>
+                        <div id="sideMeltList" class="grid grid-cols-3 gap-1">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- RIGHT COLUMN: GAME DISPLAY (7 cols) -->
+        <section class="lg:col-span-7 flex flex-col gap-4">
+
+            <!-- SCOOP & SORT GAME MAIN PANEL -->
+            <div id="viewGame" class="space-y-4">
+                
+                <!-- Word Flashcard Card with Chef Waffly Encouragement -->
+                <div class="bg-white rounded-3xl p-5 shadow-xl border-4 border-amber-300 text-center relative overflow-hidden">
+                    <div class="absolute top-3 left-4 bg-amber-100 text-amber-900 font-bold text-xs px-3 py-1 rounded-full border border-amber-300">
+                        TIERS Flashcard #<span id="currentWordIndex">1</span>
+                    </div>
+
+                    <!-- Chef Waffly Speech Bubble -->
+                    <div class="absolute top-3 right-4 hidden sm:flex items-center gap-2 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full text-xs font-bold text-amber-900">
+                        <span>Chef Waffly says: "Say or sort this word!" 🐻🧇</span>
+                    </div>
+
+                    <!-- Word Graphic & Text Display -->
+                    <div class="my-3 flex flex-col items-center">
+                        <div id="wordEmoji" class="text-7xl mb-2 animate-float drop-shadow-md">🐱</div>
+                        <h2 id="wordSpelled" class="text-5xl font-black text-amber-950 tracking-wider">
+                            CA<span class="text-amber-600 underline decoration-wavy decoration-amber-400">T</span>
+                        </h2>
+                        <p id="phonemeHintText" class="text-xs font-bold text-amber-800 mt-2">
+                            Focus on the ending sound: <span class="bg-amber-100 text-amber-900 px-2 py-0.5 rounded-md text-sm">/t/</span>
+                        </p>
+                    </div>
+
+                    <!-- Action Audio Buttons -->
+                    <div class="flex justify-center gap-2.5">
+                        <button onclick="speakCurrentWord()" class="bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold px-4 py-2 rounded-xl shadow transition flex items-center gap-2 text-xs">
+                            <i class="fa-solid fa-volume-high text-sm"></i> Hear Word
+                        </button>
+                        <button onclick="speakTargetPhoneme()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-3 py-2 rounded-xl transition flex items-center gap-2 text-xs">
+                            <i class="fa-solid fa-ear-listen"></i> Hear Pure Ending Sound
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CATEGORY SELECTION TARGETS (FREEZE vs MELT) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    
+                    <!-- ❄️ FREEZE SCOOPS TARGET -->
+                    <div id="targetFreeze" onclick="submitSortAnswer('FREEZE')" class="bg-gradient-to-b from-sky-50 to-blue-100 hover:from-sky-100 hover:to-blue-200 border-4 border-sky-300 rounded-3xl p-5 shadow-lg transition transform hover:-translate-y-1 cursor-pointer flex flex-col items-center justify-between text-center group relative overflow-hidden">
+                        <div class="absolute top-2 right-2 text-sky-400 opacity-20 group-hover:opacity-40 text-5xl">❄️</div>
+                        
+                        <div class="w-14 h-14 rounded-2xl bg-sky-500 text-white flex items-center justify-center text-2xl shadow-md mb-2 group-hover:scale-110 transition">
+                            ❄️
+                        </div>
+
+                        <h3 class="text-xl font-black text-sky-900 tracking-wide">FREEZE WAFER</h3>
+                        <p class="text-xs font-bold text-sky-700 bg-sky-200/70 px-3 py-1 rounded-full my-2">
+                            Stop Sounds / Plosives
+                        </p>
+
+                        <p class="text-xs text-sky-800 font-medium leading-relaxed px-2 my-2">
+                            Air is stopped abruptly by lips, tongue, or palate. Requires immediate breath-clipping!
+                        </p>
+
+                        <button class="mt-4 w-full bg-sky-600 group-hover:bg-sky-700 text-white font-bold py-2.5 rounded-xl shadow transition text-xs flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-snowflake"></i> Sort to Freeze Bumper
+                        </button>
+                    </div>
+
+                    <!-- 🍦 MELT SCOOPS TARGET -->
+                    <div id="targetMelt" onclick="submitSortAnswer('MELT')" class="bg-gradient-to-b from-pink-50 to-rose-100 hover:from-pink-100 hover:to-rose-200 border-4 border-pink-300 rounded-3xl p-5 shadow-lg transition transform hover:-translate-y-1 cursor-pointer flex flex-col items-center justify-between text-center group relative overflow-hidden">
+                        <div class="absolute top-2 right-2 text-pink-400 opacity-20 group-hover:opacity-40 text-5xl">🍦</div>
+
+                        <div class="w-14 h-14 rounded-2xl bg-pink-500 text-white flex items-center justify-center text-2xl shadow-md mb-2 group-hover:scale-110 transition">
+                            🍦
+                        </div>
+
+                        <h3 class="text-xl font-black text-pink-900 tracking-wide">MELT SUNDAE</h3>
+                        <p class="text-xs font-bold text-pink-700 bg-pink-200/70 px-3 py-1 rounded-full my-2">
+                            Continuous / Nasal Sounds
+                        </p>
+
+                        <p class="text-xs text-pink-800 font-medium leading-relaxed px-2 my-2">
+                            Air/voice continues to flow smoothly. Requires a soft vocal fade-out!
+                        </p>
+
+                        <button class="mt-4 w-full bg-pink-600 group-hover:bg-pink-700 text-white font-bold py-2.5 rounded-xl shadow transition text-xs flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-ice-cream"></i> Sort to Melt Sundae
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Instant Feedback Toast Notification -->
+                <div id="gameToast" class="bg-white rounded-2xl p-3.5 border-2 border-amber-300 shadow-md flex items-center justify-between hidden transition-all">
+                    <div class="flex items-center gap-3">
+                        <div id="toastIcon" class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl font-bold">✓</div>
+                        <div>
+                            <div id="toastTitle" class="font-bold text-amber-950 text-sm">Perfect Articulation!</div>
+                            <div id="toastMsg" class="text-xs text-amber-800">You stopped the breath at the alveolar ridge!</div>
+                        </div>
+                    </div>
+                    <button onclick="nextWordCard()" class="bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold px-3 py-1.5 rounded-xl text-xs transition">
+                        Next Word <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- FOOTER CHEAT SHEET SUMMARY -->
+    <footer class="bg-white border-t border-amber-200 py-3 mt-6">
+        <div class="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between text-xs text-amber-800 gap-3">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-amber-950">TIERS Flashcards Sound Standards:</span>
+                <span class="bg-sky-100 text-sky-800 font-bold px-2 py-0.5 rounded">Freeze: /t/, /p/, /k/, /d/, /g/, /b/</span>
+                <span class="bg-pink-100 text-pink-800 font-bold px-2 py-0.5 rounded">Melt: /m/, /n/, /s/, /f/, /x/, /z/, /l/</span>
+            </div>
+            <div>
+                Waffly’s Wafer Bakery • Phonicademy Year 1 Pure Phoneme Standards
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- JAVASCRIPT LOGIC & ENGINE -->
+    <script>
+        /* ==========================================================================
+           1. DATA STRUCTURE: 13 PHONEMES WITH COMPLETE TIERS FLASHCARD WORDS
+           ========================================================================== */
+        const PHONEME_DATA = {
+            // FREEZE SCOOPS (6 Letters) - Stop Sounds / Plosives
+            't': {
+                type: 'FREEZE',
+                letter: 't',
+                emoji: '👅',
+                targetDesc: 'Tongue on teeth ridge',
+                airflowDesc: 'Air stopped abruptly by tongue tip pressed against alveolar ridge.',
+                rule: 'Require immediate breath-clipping at the Freeze Bumper.',
+                words: [
+                    { spelled: 'CAT', ending: 't', icon: '🐱' },
+                    { spelled: 'NET', ending: 't', icon: '🕸️' },
+                    { spelled: 'POT', ending: 't', icon: '🍲' },
+                    { spelled: 'HAT', ending: 't', icon: '🎩' },
+                    { spelled: 'MAT', ending: 't', icon: '🧹' },
+                    { spelled: 'WET', ending: 't', icon: '💧' }
+                ],
+                svgType: 'tongue_teeth'
+            },
+            'p': {
+                type: 'FREEZE',
+                letter: 'p',
+                emoji: '👄',
+                targetDesc: 'Lips pressed together',
+                airflowDesc: 'Air pressure builds behind closed lips then abruptly stops or pops.',
+                rule: 'Require immediate breath-clipping at the Freeze Bumper.',
+                words: [
+                    { spelled: 'CUP', ending: 'p', icon: '☕' },
+                    { spelled: 'MAP', ending: 'p', icon: '🗺️' },
+                    { spelled: 'ZIP', ending: 'p', icon: '🤐' }
+                ],
+                svgType: 'closed_lips'
+            },
+            'k': {
+                type: 'FREEZE',
+                letter: 'k',
+                emoji: '🗣️',
+                targetDesc: 'Back of tongue on palate',
+                airflowDesc: 'Back of tongue seals against soft palate to trap and abruptly clip air.',
+                rule: 'Require immediate breath-clipping at the Freeze Bumper.',
+                words: [
+                    { spelled: 'YAK', ending: 'k', icon: '🐂' }
+                ],
+                svgType: 'back_tongue'
+            },
+            'd': {
+                type: 'FREEZE',
+                letter: 'd',
+                emoji: '👅',
+                targetDesc: 'Tongue on teeth ridge',
+                airflowDesc: 'Voiced stop: tongue tip presses ridge, abruptly trapping vocal breath.',
+                rule: 'Require immediate breath-clipping at the Freeze Bumper.',
+                words: [
+                    { spelled: 'BED', ending: 'd', icon: '🛏️' },
+                    { spelled: 'RED', ending: 'd', icon: '🟥' }
+                ],
+                svgType: 'tongue_teeth'
+            },
+            'g': {
+                type: 'FREEZE',
+                letter: 'g',
+                emoji: '🗣️',
+                targetDesc: 'Back of tongue on palate',
+                airflowDesc: 'Voiced stop: back of tongue firmly seals velum to stop vocal flow.',
+                rule: 'Require immediate breath-clipping at the Freeze Bumper.',
+                words: [
+                    { spelled: 'DOG', ending: 'g', icon: '🐶' },
+                    { spelled: 'PIG', ending: 'g', icon: '🐷' },
+                    { spelled: 'BAG', ending: 'g', icon: '🎒' }
+                ],
+                svgType: 'back_tongue'
+            },
+            'b': {
+                type: 'FREEZE',
+                letter: 'b',
+                emoji: '👄',
+                targetDesc: 'Lips pressed together',
+                airflowDesc: 'Voiced stop: both lips seal firmly to stop vocalized air stream.',
+                rule: 'Require immediate breath-clipping at the Freeze Bumper.',
+                words: [
+                    { spelled: 'TUB', ending: 'b', icon: '🛁' },
+                    { spelled: 'RIB', ending: 'b', icon: '🍖' },
+                    { spelled: 'WEB', ending: 'b', icon: '🕸️' }
+                ],
+                svgType: 'closed_lips'
+            },
+
+            // MELT SCOOPS (7 Letters) - Continuous / Nasal / Friction Sounds
+            'm': {
+                type: 'MELT',
+                letter: 'm',
+                emoji: '🥮',
+                targetDesc: 'Closed-lip hum',
+                airflowDesc: 'Lips remain gently closed while voice resonates smoothly out the nose.',
+                rule: 'Require a soft vocal fade-out at the track end.',
+                words: [
+                    { spelled: 'JAM', ending: 'm', icon: '🍓' },
+                    { spelled: 'MUM', ending: 'm', icon: '👩' }
+                ],
+                svgType: 'nasal_lips'
+            },
+            'n': {
+                type: 'MELT',
+                letter: 'n',
+                emoji: '👅',
+                targetDesc: 'Nasal hum',
+                airflowDesc: 'Tongue tip seals ridge while sound flows continuously through nose.',
+                rule: 'Require a soft vocal fade-out at the track end.',
+                words: [
+                    { spelled: 'SUN', ending: 'n', icon: '☀️' },
+                    { spelled: 'PEN', ending: 'n', icon: '🖊️' },
+                    { spelled: 'PIN', ending: 'n', icon: '📌' },
+                    { spelled: 'VAN', ending: 'n', icon: '🚐' },
+                    { spelled: 'TEN', ending: 'n', icon: '🔟' }
+                ],
+                svgType: 'nasal_tongue'
+            },
+            's': {
+                type: 'MELT',
+                letter: 's',
+                emoji: '😬',
+                targetDesc: 'Hissing air',
+                airflowDesc: 'Smooth continuous friction air stream passing between teeth.',
+                rule: 'Require a soft vocal fade-out at the track end.',
+                words: [
+                    { spelled: 'BUS', ending: 's', icon: '🚌' }
+                ],
+                svgType: 'hissing_teeth'
+            },
+            'f': {
+                type: 'MELT',
+                letter: 'f',
+                emoji: '🦷',
+                targetDesc: 'Teeth on bottom lip',
+                airflowDesc: 'Upper front teeth touch bottom lip letting air continuously escape.',
+                rule: 'Require a soft vocal fade-out at the track end.',
+                words: [
+                    { spelled: 'OFF', ending: 'f', icon: '🔴' }
+                ],
+                svgType: 'teeth_lip'
+            },
+            'x': {
+                type: 'MELT',
+                letter: 'x',
+                emoji: '💨',
+                targetDesc: 'Friction /ks/ sound',
+                airflowDesc: 'Transitions into continuous hissing friction air.',
+                rule: 'Require a soft vocal fade-out at the track end.',
+                words: [
+                    { spelled: 'FOX', ending: 'x', icon: '🦊' },
+                    { spelled: 'BOX', ending: 'x', icon: '📦' }
+                ],
+                svgType: 'friction_ks'
+            },
+            'z': {
+                type: 'MELT',
+                letter: 'z',
+                emoji: '🐝',
+                targetDesc: 'Buzzing /z/ sound',
+                airflowDesc: 'Continuous voiced buzzing airflow with vibrating vocal folds.',
+                rule: 'Require a soft vocal fade-out at the track end.',
+                words: [
+                    { spelled: 'BUZZ', ending: 'z', icon: '🐝' },
+                    { spelled: 'FIZZ', ending: 'z', icon: '🥤' }
+                ],
+                svgType: 'buzzing_vocal'
+            },
+            'l': {
+                type: 'MELT',
+                letter: 'l',
+                emoji: '👅',
+                targetDesc: 'Liquid /l/ sound',
+                airflowDesc: 'Tongue tip touches ridge; voice flows smoothly around sides of tongue.',
+                rule: 'Require a soft vocal fade-out at the track end.',
+                words: [
+                    { spelled: 'PAL', ending: 'l', icon: '🤝' }
+                ],
+                svgType: 'liquid_lateral'
+            }
+        };
+
+        // Flatten all words into a master list for game sequence
+        let masterWordList = [];
+        Object.keys(PHONEME_DATA).forEach(key => {
+            const item = PHONEME_DATA[key];
+            item.words.forEach(w => {
+                masterWordList.push({
+                    ...w,
+                    phonemeKey: key,
+                    type: item.type
+                });
+            });
+        });
+
+        /* ==========================================================================
+           2. GLOBAL STATE
+           ========================================================================== */
+        let score = 0;
+        let streak = 0;
+        let currentWordIndex = 0;
+        let activePhonemeKey = 't';
+        let isAudioSynthEnabled = true;
+        let isWebcamActive = false;
+        let mediaStream = null;
+        let audioCtx = null;
+        let analyser = null;
+        let micSource = null;
+        let speechSynth = window.speechSynthesis;
+
+        /* ==========================================================================
+           3. INITIALIZATION & UI MOUNT
+           ========================================================================== */
+        window.addEventListener('load', () => {
+            initAudioVisualizerBars();
+            renderSidePhonemeLists();
+            selectCurrentGameWord(0);
+            drawFallbackAvatar();
+            requestCameraAccess();
+        });
+
+        /* ==========================================================================
+           SIDE PANEL PHONEME LIST GENERATOR
+           ========================================================================== */
+        function renderSidePhonemeLists() {
+            const freezeContainer = document.getElementById('sideFreezeList');
+            const meltContainer = document.getElementById('sideMeltList');
+
+            if (!freezeContainer || !meltContainer) return;
+
+            freezeContainer.innerHTML = '';
+            meltContainer.innerHTML = '';
+
+            Object.keys(PHONEME_DATA).forEach(key => {
+                const item = PHONEME_DATA[key];
+                const exampleWord = item.words[0] ? item.words[0].spelled.toLowerCase() : '';
+
+                const btn = document.createElement('button');
+                btn.id = `sideBtn_${key}`;
+                btn.onclick = () => selectPhonemeFromSideList(key);
+
+                if (item.type === 'FREEZE') {
+                    btn.className = `p-1 rounded-xl border text-left transition flex items-center gap-1 ${activePhonemeKey === key ? 'bg-sky-500 text-white border-sky-600 shadow-sm scale-105' : 'bg-white hover:bg-sky-100 text-sky-950 border-sky-200'}`;
+                    btn.innerHTML = `
+                        <span class="text-[10px] font-black px-1.5 py-0.2 rounded ${activePhonemeKey === key ? 'bg-sky-700 text-white' : 'bg-sky-100 text-sky-800'}">/${key}/</span>
+                        <div class="leading-none overflow-hidden">
+                            <div class="text-[9px] font-bold truncate">${item.emoji} ${exampleWord}</div>
+                        </div>
+                    `;
+                    freezeContainer.appendChild(btn);
+                } else {
+                    btn.className = `p-1 rounded-xl border text-left transition flex items-center gap-1 ${activePhonemeKey === key ? 'bg-pink-500 text-white border-pink-600 shadow-sm scale-105' : 'bg-white hover:bg-pink-100 text-pink-950 border-pink-200'}`;
+                    btn.innerHTML = `
+                        <span class="text-[10px] font-black px-1.5 py-0.2 rounded ${activePhonemeKey === key ? 'bg-pink-700 text-white' : 'bg-pink-100 text-pink-800'}">/${key}/</span>
+                        <div class="leading-none overflow-hidden">
+                            <div class="text-[9px] font-bold truncate">${item.emoji} ${exampleWord}</div>
+                        </div>
+                    `;
+                    meltContainer.appendChild(btn);
+                }
+            });
+        }
+
+        function selectPhonemeFromSideList(key) {
+            activePhonemeKey = key;
+
+            // Find first word in master list matching this phoneme
+            const foundIndex = masterWordList.findIndex(w => w.phonemeKey === key);
+            if (foundIndex !== -1) {
+                selectCurrentGameWord(foundIndex);
+            } else {
+                updateSideArticulationCard(key);
+            }
+
+            renderSidePhonemeLists();
+        }
+
+        // Initialize mic visualizer bars inside camera frame
+        function initAudioVisualizerBars() {
+            const container = document.getElementById('audioWaveContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            for (let i = 0; i < 16; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'wave-bar flex-1 bg-emerald-400 rounded-full h-1';
+                container.appendChild(bar);
+            }
+        }
+
+        /* ==========================================================================
+           4. WEBCAM & AUDIO ANALYZER ENGINE
+           ========================================================================== */
+        async function requestCameraAccess() {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 360 } },
+                    audio: true
+                });
+
+                const videoEl = document.getElementById('webcamVideo');
+                videoEl.srcObject = mediaStream;
+                document.getElementById('camFallback').classList.add('hidden');
+                isWebcamActive = true;
+
+                setupAudioAnalyzer(mediaStream);
+            } catch (err) {
+                console.warn('Webcam/Mic access denied or unavailable:', err);
+                document.getElementById('camFallback').classList.remove('hidden');
+                document.getElementById('camStatusPing').classList.remove('bg-emerald-400');
+                document.getElementById('camStatusPing').classList.add('bg-amber-400');
+                document.getElementById('camStatusDot').classList.remove('bg-emerald-500');
+                document.getElementById('camStatusDot').classList.add('bg-amber-500');
+            }
+        }
+
+        function toggleWebcam() {
+            if (!mediaStream) {
+                requestCameraAccess();
+                return;
+            }
+            const videoTrack = mediaStream.getVideoTracks()[0];
+            if (videoTrack) {
+                videoTrack.enabled = !videoTrack.enabled;
+                if (videoTrack.enabled) {
+                    document.getElementById('camFallback').classList.add('hidden');
+                } else {
+                    document.getElementById('camFallback').classList.remove('hidden');
+                }
+            }
+        }
+
+        function toggleMirrorMode() {
+            const videoEl = document.getElementById('webcamVideo');
+            videoEl.classList.toggle('-scale-x-100');
+        }
+
+        function setupAudioAnalyzer(stream) {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 64;
+                micSource = audioCtx.createMediaStreamSource(stream);
+                micSource.connect(analyser);
+
+                const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                const bars = document.querySelectorAll('#audioWaveContainer .wave-bar');
+
+                function updateWave() {
+                    if (analyser) {
+                        analyser.getByteFrequencyData(dataArray);
+                        let sum = 0;
+                        for (let i = 0; i < bars.length; i++) {
+                            const val = dataArray[i] || 0;
+                            sum += val;
+                            const h = Math.max(3, Math.min(20, (val / 255) * 20));
+                            if (bars[i]) bars[i].style.height = `${h}px`;
+                        }
+                        const avg = sum / bars.length;
+                        const micText = document.getElementById('micVolText');
+                        if (avg > 25) {
+                            micText.innerText = 'Speaking!';
+                            micText.className = 'text-[9px] font-mono text-amber-400 font-bold';
+                        } else {
+                            micText.innerText = 'Mic Ready';
+                            micText.className = 'text-[9px] font-mono text-emerald-400 font-bold';
+                        }
+                    }
+                    requestAnimationFrame(updateWave);
+                }
+                updateWave();
+            } catch (e) {
+                console.log('Audio Context setup:', e);
+            }
+        }
+
+        /* ==========================================================================
+           5. FALLBACK CANVAS AVATAR (Mouth Articulation Mirror)
+           ========================================================================== */
+        function drawFallbackAvatar() {
+            const canvas = document.getElementById('avatarCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            function renderAvatar() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Face background
+                ctx.fillStyle = '#fef3c7';
+                ctx.beginPath();
+                ctx.arc(90, 65, 50, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#d97706';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Eyes
+                ctx.fillStyle = '#451a03';
+                ctx.beginPath();
+                ctx.arc(72, 55, 5, 0, Math.PI * 2);
+                ctx.arc(108, 55, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Cheeks
+                ctx.fillStyle = 'rgba(251, 146, 60, 0.4)';
+                ctx.beginPath();
+                ctx.arc(62, 65, 7, 0, Math.PI * 2);
+                ctx.arc(118, 65, 7, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Dynamic Mouth Shape
+                ctx.fillStyle = '#b45309';
+                ctx.strokeStyle = '#78350f';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                const phonemeInfo = PHONEME_DATA[activePhonemeKey];
+                if (phonemeInfo && phonemeInfo.type === 'FREEZE') {
+                    ctx.ellipse(90, 85, 12, 4, 0, 0, Math.PI * 2);
+                } else {
+                    ctx.ellipse(90, 85, 10, 10, 0, 0, Math.PI * 2);
+                }
+                ctx.fill();
+                ctx.stroke();
+
+                // Teeth indicator
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(83, 82, 14, 3);
+
+                requestAnimationFrame(renderAvatar);
+            }
+            renderAvatar();
+        }
+
+        /* ==========================================================================
+           6. DYNAMIC SVG ARTICULATION DIAGRAM GENERATOR
+           ========================================================================== */
+        function renderArticulationSVG(svgType) {
+            const wrapper = document.getElementById('svgMouthWrapper');
+            let svgContent = '';
+
+            switch(svgType) {
+                case 'tongue_teeth': // t, d (Freeze Stop Plosive)
+                    svgContent = `
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <path d="M 15 85 Q 15 20 60 20 Q 82 20 85 45 Q 85 65 75 80" fill="none" stroke="#cbd5e1" stroke-width="2.5" />
+                        <path d="M 45 32 L 65 32 L 65 44 L 58 44 Z" fill="#f8fafc" stroke="#64748b" stroke-width="2"/>
+                        <circle cx="58" cy="33" r="5" fill="#38bdf8" class="anim-glow-spot"/>
+                        <g class="anim-tongue-tap">
+                            <path d="M 25 78 Q 42 68 58 45 Q 48 52 28 65 Z" fill="#f472b6" stroke="#db2777" stroke-width="2.5"/>
+                        </g>
+                        <g class="anim-freeze-burst">
+                            <circle cx="62" cy="45" r="7" fill="#0284c7" opacity="0.8"/>
+                            <path d="M 68 38 L 78 32 M 72 45 L 82 45 M 68 52 L 78 58" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+                        </g>
+                        <text x="5" y="15" font-size="8" font-weight="bold" fill="#0369a1">1. Tongue Up 👅</text>
+                        <text x="5" y="94" font-size="8" font-weight="bold" fill="#db2777">2. Clip & POP! 💥</text>
+                    </svg>`;
+                    break;
+
+                case 'closed_lips': // p, b (Freeze Stop Plosive)
+                    svgContent = `
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <g class="anim-lip-pop">
+                            <path d="M 20 46 Q 50 34 80 46 Q 50 50 20 46 Z" fill="#f472b6" stroke="#db2777" stroke-width="2.5"/>
+                            <path d="M 20 46 Q 50 42 80 46 Q 50 62 20 46 Z" fill="#e11d48" stroke="#be185d" stroke-width="2.5"/>
+                        </g>
+                        <path d="M 50 22 L 50 34" stroke="#0284c7" stroke-width="2.5" class="anim-tongue-tap"/>
+                        <path d="M 50 70 L 50 58" stroke="#0284c7" stroke-width="2.5" class="anim-tongue-tap"/>
+                        <g class="anim-freeze-burst">
+                            <circle cx="50" cy="46" r="12" fill="#38bdf8" opacity="0.6"/>
+                            <text x="50" y="49" font-size="8" font-weight="bold" fill="#0369a1" text-anchor="middle">POP! 💥</text>
+                        </g>
+                        <text x="50" y="14" font-size="8" font-weight="bold" fill="#0284c7" text-anchor="middle">1. Press Lips 👄</text>
+                        <text x="50" y="92" font-size="8" font-weight="bold" fill="#db2777" text-anchor="middle">2. Air Burst 🛑</text>
+                    </svg>`;
+                    break;
+
+                case 'back_tongue': // k, g (Freeze Stop Plosive)
+                    svgContent = `
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <path d="M 25 25 Q 60 25 72 38 Q 65 48 55 42" fill="none" stroke="#64748b" stroke-width="3"/>
+                        <circle cx="68" cy="40" r="5" fill="#38bdf8" class="anim-glow-spot"/>
+                        <g class="anim-back-tongue">
+                            <path d="M 18 78 Q 40 72 65 42 Q 40 48 18 64 Z" fill="#f472b6" stroke="#db2777" stroke-width="2.5"/>
+                        </g>
+                        <g class="anim-freeze-burst">
+                            <circle cx="65" cy="42" r="8" fill="#0284c7" opacity="0.8"/>
+                        </g>
+                        <text x="10" y="15" font-size="8" font-weight="bold" fill="#0369a1">1. Back Tongue Up 🗣️</text>
+                        <text x="10" y="92" font-size="8" font-weight="bold" fill="#db2777">2. Clip at Palate 🛑</text>
+                    </svg>`;
+                    break;
+
+                case 'nasal_lips': // m (Melt Nasal Continuous)
+                case 'nasal_tongue': // n (Melt Nasal Continuous)
+                    svgContent = `
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <path d="M 35 15 Q 60 15 65 32 L 52 35 L 50 65" fill="none" stroke="#64748b" stroke-width="2.5"/>
+                        <path d="M 45 28 Q 65 20 85 24" fill="none" stroke="#f472b6" stroke-width="3" class="anim-air-stream"/>
+                        <path d="M 45 22 Q 65 14 85 18" fill="none" stroke="#fbbf24" stroke-width="2" class="anim-air-stream"/>
+                        <circle cx="70" cy="18" r="3" fill="#db2777" class="anim-nose-air"/>
+                        <ellipse cx="48" cy="55" rx="14" ry="4" fill="#db2777"/>
+                        <text x="5" y="12" font-size="8" font-weight="bold" fill="#db2777">Nasal Flow 👃✨</text>
+                        <text x="5" y="92" font-size="8" font-weight="bold" fill="#0284c7">Smooth Hum Fade 🍦</text>
+                    </svg>`;
+                    break;
+
+                case 'hissing_teeth': // s, x, z (Melt Continuous Friction)
+                case 'friction_ks':
+                case 'buzzing_vocal':
+                    svgContent = `
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <rect x="32" y="28" width="32" height="14" fill="#ffffff" stroke="#64748b" stroke-width="2" rx="3"/>
+                        <rect x="32" y="44" width="32" height="14" fill="#ffffff" stroke="#64748b" stroke-width="2" rx="3"/>
+                        <path d="M 10 43 L 90 43" stroke="#f472b6" stroke-width="4" stroke-linecap="round" class="anim-air-stream"/>
+                        <path d="M 15 37 L 85 37" stroke="#fbbf24" stroke-width="2" class="anim-air-stream"/>
+                        <text x="50" y="15" font-size="8" font-weight="bold" fill="#db2777" text-anchor="middle">Teeth Close 😬</text>
+                        <text x="50" y="92" font-size="8" font-weight="bold" fill="#0284c7" text-anchor="middle">Continuous Air 🐍💨</text>
+                    </svg>`;
+                    break;
+
+                case 'teeth_lip': // f (Melt Continuous)
+                    svgContent = `
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <rect x="38" y="26" width="24" height="16" fill="#ffffff" stroke="#64748b" stroke-width="2" rx="2"/>
+                        <path d="M 25 42 Q 50 46 75 42 Q 50 64 25 42 Z" fill="#f472b6" stroke="#db2777" stroke-width="2.5"/>
+                        <path d="M 30 48 Q 55 52 85 48" fill="none" stroke="#fbbf24" stroke-width="3" class="anim-air-stream"/>
+                        <text x="50" y="14" font-size="8" font-weight="bold" fill="#db2777" text-anchor="middle">Teeth on Lip 🦷</text>
+                        <text x="50" y="92" font-size="8" font-weight="bold" fill="#0284c7" text-anchor="middle">Smooth Air Stream 💨</text>
+                    </svg>`;
+                    break;
+
+                default: // liquid_lateral (/l/)
+                    svgContent = `
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <circle cx="50" cy="50" r="35" fill="#fce7f3" stroke="#f472b6" stroke-width="2.5"/>
+                        <ellipse cx="50" cy="45" rx="8" ry="12" fill="#db2777"/>
+                        <path d="M 20 60 Q 30 35 42 30" fill="none" stroke="#38bdf8" stroke-width="3" class="anim-air-stream"/>
+                        <path d="M 80 60 Q 70 35 58 30" fill="none" stroke="#38bdf8" stroke-width="3" class="anim-air-stream"/>
+                        <text x="50" y="14" font-size="8" font-weight="bold" fill="#db2777" text-anchor="middle">Tongue Up 👅</text>
+                        <text x="50" y="92" font-size="8" font-weight="bold" fill="#0284c7" text-anchor="middle">Air Around Sides 🌊</text>
+                    </svg>`;
+            }
+            wrapper.innerHTML = svgContent;
+        }
+
+        function triggerMouthAnimation() {
+            speakTargetPhoneme();
+            const wrapper = document.getElementById('svgMouthWrapper');
+            if (wrapper) {
+                wrapper.classList.add('scale-110');
+                setTimeout(() => wrapper.classList.remove('scale-110'), 600);
+            }
+        }
+
+        /* ==========================================================================
+           7. GAME LOGIC & WORD CARD MANAGEMENT
+           ========================================================================== */
+        function selectCurrentGameWord(index) {
+            currentWordIndex = index % masterWordList.length;
+            if (currentWordIndex < 0) currentWordIndex = 0;
+
+            const currentItem = masterWordList[currentWordIndex];
+            activePhonemeKey = currentItem.phonemeKey;
+
+            // Update Flashcard UI
+            document.getElementById('currentWordIndex').innerText = currentWordIndex + 1;
+            document.getElementById('wordEmoji').innerText = currentItem.icon;
+            
+            // Highlight target ending letter
+            const wordStr = currentItem.spelled;
+            const mainPart = wordStr.slice(0, -1);
+            const lastChar = wordStr.slice(-1);
+            document.getElementById('wordSpelled').innerHTML = `${mainPart}<span class="text-amber-600 underline decoration-wavy decoration-amber-400">${lastChar}</span>`;
+            document.getElementById('phonemeHintText').innerHTML = `Focus on ending sound: <span class="bg-amber-100 text-amber-950 px-2.5 py-0.5 rounded-md font-bold text-sm">/${currentItem.phonemeKey}/</span>`;
+
+            // Update Side Articulation Card
+            updateSideArticulationCard(currentItem.phonemeKey);
+
+            // Hide Toast
+            document.getElementById('gameToast').classList.add('hidden');
+        }
+
+        function updateSideArticulationCard(phonemeKey) {
+            const data = PHONEME_DATA[phonemeKey];
+            if (!data) return;
+
+            document.getElementById('sidePhonemeTitle').innerText = `Sound Target: /${data.letter}/`;
+            document.getElementById('sideTargetText').innerText = `${data.emoji} ${data.targetDesc}`;
+            document.getElementById('sideAirflowText').innerText = data.airflowDesc;
+
+            const badge = document.getElementById('sideCardBadge');
+            const label = document.getElementById('sideCategoryLabel');
+            const sideCount = document.getElementById('sideLetterCount');
+
+            if (data.type === 'FREEZE') {
+                badge.innerText = '❄️';
+                badge.className = 'text-xl px-2 py-0.5 rounded-xl bg-sky-100 text-sky-700 font-bold';
+                label.innerText = 'Freeze Wafer (Stop Sound)';
+                label.className = 'text-[10px] font-bold text-sky-600 uppercase tracking-wider';
+                sideCount.innerText = '6 Freeze Letters';
+                sideCount.className = 'text-[10px] font-bold text-sky-700 bg-sky-100 px-2 py-0.5 rounded-full';
+            } else {
+                badge.innerText = '🍦';
+                badge.className = 'text-xl px-2 py-0.5 rounded-xl bg-pink-100 text-pink-700 font-bold';
+                label.innerText = 'Melt Sundae (Continuous Sound)';
+                label.className = 'text-[10px] font-bold text-pink-600 uppercase tracking-wider';
+                sideCount.innerText = '7 Melt Letters';
+                sideCount.className = 'text-[10px] font-bold text-pink-700 bg-pink-100 px-2 py-0.5 rounded-full';
+            }
+
+            renderArticulationSVG(data.svgType);
+            renderSidePhonemeLists();
+        }
+
+        function submitSortAnswer(selectedType) {
+            const currentItem = masterWordList[currentWordIndex];
+            const isCorrect = (selectedType === currentItem.type);
+
+            const toast = document.getElementById('gameToast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMsg = document.getElementById('toastMsg');
+
+            toast.classList.remove('hidden');
+
+            if (isCorrect) {
+                score += 10;
+                streak += 1;
+                document.getElementById('scoreDisplay').innerText = score;
+                document.getElementById('streakDisplay').innerText = streak;
+
+                if (selectedType === 'FREEZE') {
+                    playFreezeSnapAudio();
+                    toastIcon.innerText = '❄️';
+                    toastIcon.className = 'w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-xl font-bold';
+                    toastTitle.innerText = 'Freeze Wafer Clipped!';
+                    toastMsg.innerText = `Correct! /${currentItem.phonemeKey}/ air is stopped abruptly at the Freeze Bumper!`;
+                } else {
+                    playMeltFadeAudio();
+                    toastIcon.innerText = '🍦';
+                    toastIcon.className = 'w-10 h-10 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center text-xl font-bold';
+                    toastTitle.innerText = 'Smooth Melt Sundae!';
+                    toastMsg.innerText = `Correct! /${currentItem.phonemeKey}/ air flows smoothly with a soft fade-out!`;
+                }
+
+                confetti({
+                    particleCount: 40,
+                    spread: 60,
+                    origin: { y: 0.7 }
+                });
+            } else {
+                streak = 0;
+                document.getElementById('streakDisplay').innerText = streak;
+                toastIcon.innerText = '⚠️';
+                toastIcon.className = 'w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-xl font-bold';
+                toastTitle.innerText = 'Try Articulating Again';
+                toastMsg.innerText = `Notice: /${currentItem.phonemeKey}/ is a ${currentItem.type === 'FREEZE' ? 'FREEZE Wafer (Stop Sound)' : 'MELT Sundae (Continuous Sound)'}!`;
+            }
+        }
+
+        function nextWordCard() {
+            selectCurrentGameWord(currentWordIndex + 1);
+        }
+
+        /* ==========================================================================
+           8. PURE SYNTHETIC PHONEME AUDIO SYNTHESIZER (PHONICADEMY STANDARDS)
+           ========================================================================== */
+        function toggleAudioSynth() {
+            isAudioSynthEnabled = !isAudioSynthEnabled;
+            const icon = document.getElementById('audioIcon');
+            icon.className = isAudioSynthEnabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark text-rose-500';
+        }
+
+        function speakCurrentWord() {
+            if (!isAudioSynthEnabled) return;
+            const currentItem = masterWordList[currentWordIndex];
+            const utterance = new SpeechSynthesisUtterance(currentItem.spelled);
+            utterance.rate = 0.85;
+            speechSynth.speak(utterance);
+        }
+
+        // PURE PHONEME SOUND GENERATOR - PHONICADEMY SYNTHETIC PHONICS SPECIFICATIONS
+        function playPurePhonemeAudio(key) {
+            if (!isAudioSynthEnabled) return;
+
+            // Stop any ongoing speech synthesis to prevent letter-name pollution (e.g. "em", "en", "ef")
+            if (speechSynth) {
+                speechSynth.cancel();
+            }
+
+            // 1. Web Audio API Pure Acoustic Sound Synthesizer (Zero Letter Names, Zero Schwa "uh")
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) {
+                    const ctx = new AudioCtx();
+                    if (ctx.state === 'suspended') {
+                        ctx.resume();
+                    }
+                    const now = ctx.currentTime;
+
+                    const createNoiseBuffer = (durationSec) => {
+                        const bufferSize = ctx.sampleRate * durationSec;
+                        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                        const output = buffer.getChannelData(0);
+                        for (let i = 0; i < bufferSize; i++) {
+                            output[i] = Math.random() * 2 - 1;
+                        }
+                        return buffer;
+                    };
+
+                    switch (key) {
+                        // ----------------------------------------------------
+                        // CONTINUANTS & NASALS (MELT SUNDAES - SUSTAINED AIRFLOW)
+                        // ----------------------------------------------------
+                        case 'm': {
+                            // /m/ - Sustained Closed-Lip Nasal Hum ("mmmmmm")
+                            const osc = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(145, now);
+
+                            const filter = ctx.createBiquadFilter();
+                            filter.type = 'lowpass';
+                            filter.frequency.setValueAtTime(320, now);
+
+                            gain.gain.setValueAtTime(0.01, now);
+                            gain.gain.linearRampToValueAtTime(0.6, now + 0.1);
+                            gain.gain.setValueAtTime(0.6, now + 0.65);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+
+                            osc.connect(filter);
+                            filter.connect(gain);
+                            gain.connect(ctx.destination);
+                            osc.start(now);
+                            osc.stop(now + 0.88);
+                            break;
+                        }
+
+                        case 'n': {
+                            // /n/ - Sustained Alveolar Nasal Hum ("nnnnnn")
+                            const osc = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(215, now);
+
+                            const filter = ctx.createBiquadFilter();
+                            filter.type = 'bandpass';
+                            filter.frequency.setValueAtTime(520, now);
+
+                            gain.gain.setValueAtTime(0.01, now);
+                            gain.gain.linearRampToValueAtTime(0.6, now + 0.1);
+                            gain.gain.setValueAtTime(0.6, now + 0.65);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+
+                            osc.connect(filter);
+                            filter.connect(gain);
+                            gain.connect(ctx.destination);
+                            osc.start(now);
+                            osc.stop(now + 0.88);
+                            break;
+                        }
+
+                        case 's': {
+                            // /s/ - Sustained Alveolar Hiss ("ssssss")
+                            const noiseBuf = createNoiseBuffer(0.8);
+                            const noiseSrc = ctx.createBufferSource();
+                            noiseSrc.buffer = noiseBuf;
+
+                            const highpass = ctx.createBiquadFilter();
+                            highpass.type = 'highpass';
+                            highpass.frequency.setValueAtTime(4600, now);
+
+                            const gain = ctx.createGain();
+                            gain.gain.setValueAtTime(0.01, now);
+                            gain.gain.linearRampToValueAtTime(0.5, now + 0.08);
+                            gain.gain.setValueAtTime(0.5, now + 0.6);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+                            noiseSrc.connect(highpass);
+                            highpass.connect(gain);
+                            gain.connect(ctx.destination);
+                            noiseSrc.start(now);
+                            break;
+                        }
+
+                        case 'f': {
+                            // /f/ - Sustained Labiodental Wind Friction ("ffffff")
+                            const noiseBuf = createNoiseBuffer(0.8);
+                            const noiseSrc = ctx.createBufferSource();
+                            noiseSrc.buffer = noiseBuf;
+
+                            const bandpass = ctx.createBiquadFilter();
+                            bandpass.type = 'bandpass';
+                            bandpass.frequency.setValueAtTime(2500, now);
+                            bandpass.Q.setValueAtTime(0.9, now);
+
+                            const gain = ctx.createGain();
+                            gain.gain.setValueAtTime(0.01, now);
+                            gain.gain.linearRampToValueAtTime(0.45, now + 0.08);
+                            gain.gain.setValueAtTime(0.45, now + 0.6);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+                            noiseSrc.connect(bandpass);
+                            bandpass.connect(gain);
+                            gain.connect(ctx.destination);
+                            noiseSrc.start(now);
+                            break;
+                        }
+
+                        case 'x': {
+                            // /x/ - Blend /k/ burst + Sustained /s/ hiss ("ksssss")
+                            const kBuf = createNoiseBuffer(0.03);
+                            const kSrc = ctx.createBufferSource();
+                            kSrc.buffer = kBuf;
+
+                            const kFilter = ctx.createBiquadFilter();
+                            kFilter.type = 'bandpass';
+                            kFilter.frequency.setValueAtTime(2200, now);
+
+                            const kGain = ctx.createGain();
+                            kGain.gain.setValueAtTime(0.7, now);
+                            kGain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+
+                            kSrc.connect(kFilter);
+                            kFilter.connect(kGain);
+                            kGain.connect(ctx.destination);
+                            kSrc.start(now);
+
+                            const sBuf = createNoiseBuffer(0.7);
+                            const sSrc = ctx.createBufferSource();
+                            sSrc.buffer = sBuf;
+
+                            const sFilter = ctx.createBiquadFilter();
+                            sFilter.type = 'highpass';
+                            sFilter.frequency.setValueAtTime(4500, now + 0.025);
+
+                            const sGain = ctx.createGain();
+                            sGain.gain.setValueAtTime(0.01, now + 0.025);
+                            sGain.gain.linearRampToValueAtTime(0.45, now + 0.08);
+                            sGain.gain.setValueAtTime(0.45, now + 0.55);
+                            sGain.gain.exponentialRampToValueAtTime(0.001, now + 0.72);
+
+                            sSrc.connect(sFilter);
+                            sFilter.connect(sGain);
+                            sGain.connect(ctx.destination);
+                            sSrc.start(now + 0.025);
+                            break;
+                        }
+
+                        case 'z': {
+                            // /z/ - Sustained Voiced Buzzing ("zzzzzz")
+                            const osc = ctx.createOscillator();
+                            osc.type = 'sawtooth';
+                            osc.frequency.setValueAtTime(140, now);
+
+                            const oscGain = ctx.createGain();
+                            oscGain.gain.setValueAtTime(0.01, now);
+                            oscGain.gain.linearRampToValueAtTime(0.22, now + 0.08);
+                            oscGain.gain.setValueAtTime(0.22, now + 0.6);
+                            oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+                            const noiseBuf = createNoiseBuffer(0.8);
+                            const noiseSrc = ctx.createBufferSource();
+                            noiseSrc.buffer = noiseBuf;
+
+                            const noiseFilter = ctx.createBiquadFilter();
+                            noiseFilter.type = 'highpass';
+                            noiseFilter.frequency.setValueAtTime(4000, now);
+
+                            const noiseGain = ctx.createGain();
+                            noiseGain.gain.setValueAtTime(0.01, now);
+                            noiseGain.gain.linearRampToValueAtTime(0.25, now + 0.08);
+                            noiseGain.gain.setValueAtTime(0.25, now + 0.6);
+                            noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+                            osc.connect(oscGain);
+                            oscGain.connect(ctx.destination);
+                            noiseSrc.connect(noiseFilter);
+                            noiseFilter.connect(noiseGain);
+                            noiseGain.connect(ctx.destination);
+
+                            osc.start(now);
+                            osc.stop(now + 0.82);
+                            noiseSrc.start(now);
+                            break;
+                        }
+
+                        case 'l': {
+                            // /l/ - Sustained Liquid Lateral Flow ("llllll")
+                            const osc = ctx.createOscillator();
+                            osc.type = 'triangle';
+                            osc.frequency.setValueAtTime(180, now);
+
+                            const f1 = ctx.createBiquadFilter();
+                            f1.type = 'bandpass';
+                            f1.frequency.setValueAtTime(420, now);
+                            f1.Q.setValueAtTime(2.0, now);
+
+                            const gain = ctx.createGain();
+                            gain.gain.setValueAtTime(0.01, now);
+                            gain.gain.linearRampToValueAtTime(0.55, now + 0.08);
+                            gain.gain.setValueAtTime(0.55, now + 0.6);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+                            osc.connect(f1);
+                            f1.connect(gain);
+                            gain.connect(ctx.destination);
+                            osc.start(now);
+                            osc.stop(now + 0.82);
+                            break;
+                        }
+
+                        // ----------------------------------------------------
+                        // STOP PLOSIVES (FREEZE WAFERS - ABRUPTLY CLIPPED)
+                        // ----------------------------------------------------
+                        case 'p': {
+                            const noiseBuf = createNoiseBuffer(0.04);
+                            const noiseSrc = ctx.createBufferSource();
+                            noiseSrc.buffer = noiseBuf;
+
+                            const bandpass = ctx.createBiquadFilter();
+                            bandpass.type = 'bandpass';
+                            bandpass.frequency.setValueAtTime(1200, now);
+
+                            const gainNoise = ctx.createGain();
+                            gainNoise.gain.setValueAtTime(0.8, now);
+                            gainNoise.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+
+                            noiseSrc.connect(bandpass);
+                            bandpass.connect(gainNoise);
+                            gainNoise.connect(ctx.destination);
+                            noiseSrc.start(now);
+                            break;
+                        }
+
+                        case 't': {
+                            const noiseBuf = createNoiseBuffer(0.035);
+                            const noiseSrc = ctx.createBufferSource();
+                            noiseSrc.buffer = noiseBuf;
+
+                            const highpass = ctx.createBiquadFilter();
+                            highpass.type = 'highpass';
+                            highpass.frequency.setValueAtTime(4500, now);
+
+                            const gain = ctx.createGain();
+                            gain.gain.setValueAtTime(0.85, now);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+
+                            noiseSrc.connect(highpass);
+                            highpass.connect(gain);
+                            gain.connect(ctx.destination);
+                            noiseSrc.start(now);
+                            break;
+                        }
+
+                        case 'k': {
+                            const noiseBuf = createNoiseBuffer(0.04);
+                            const noiseSrc = ctx.createBufferSource();
+                            noiseSrc.buffer = noiseBuf;
+
+                            const bandpass = ctx.createBiquadFilter();
+                            bandpass.type = 'bandpass';
+                            bandpass.frequency.setValueAtTime(2200, now);
+
+                            const gain = ctx.createGain();
+                            gain.gain.setValueAtTime(0.8, now);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+
+                            noiseSrc.connect(bandpass);
+                            bandpass.connect(gain);
+                            gain.connect(ctx.destination);
+                            noiseSrc.start(now);
+                            break;
+                        }
+
+                        case 'b': {
+                            const osc = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(140, now);
+                            osc.frequency.exponentialRampToValueAtTime(45, now + 0.05);
+
+                            gain.gain.setValueAtTime(0.7, now);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+
+                            osc.connect(gain);
+                            gain.connect(ctx.destination);
+                            osc.start(now);
+                            osc.stop(now + 0.06);
+                            break;
+                        }
+
+                        case 'd': {
+                            const osc = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(210, now);
+                            osc.frequency.exponentialRampToValueAtTime(60, now + 0.045);
+
+                            gain.gain.setValueAtTime(0.7, now);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+                            osc.connect(gain);
+                            gain.connect(ctx.destination);
+                            osc.start(now);
+                            osc.stop(now + 0.055);
+                            break;
+                        }
+
+                        case 'g': {
+                            const osc = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(170, now);
+                            osc.frequency.exponentialRampToValueAtTime(50, now + 0.05);
+
+                            gain.gain.setValueAtTime(0.7, now);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+
+                            osc.connect(gain);
+                            gain.connect(ctx.destination);
+                            osc.start(now);
+                            osc.stop(now + 0.06);
+                            break;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log('Phoneme Audio Synth error:', e);
+            }
+        }
+
+        function speakTargetPhoneme() {
+            if (!isAudioSynthEnabled) return;
+            const currentItem = masterWordList[currentWordIndex];
+            const key = currentItem ? currentItem.phonemeKey : activePhonemeKey;
+            playPurePhonemeAudio(key);
+        }
+
+        function playTargetSoundSample() {
+            speakTargetPhoneme();
+        }
+
+        // Web Audio Synthesized Freeze Snap (Abrupt Cutoff)
+        function playFreezeSnapAudio() {
+            if (!isAudioSynthEnabled) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.08);
+
+                gain.gain.setValueAtTime(0.5, ctx.currentTime);
+                gain.gain.setValueAtTime(0, ctx.currentTime + 0.09); // Abrupt clip!
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.1);
+            } catch(e){}
+        }
+
+        // Web Audio Synthesized Melt Fade (Smooth Sine Fade)
+        function playMeltFadeAudio() {
+            if (!isAudioSynthEnabled) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(220, ctx.currentTime + 0.6);
+
+                gain.gain.setValueAtTime(0.4, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6); // Soft vocal fade-out
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.65);
+            } catch(e){}
+        }
+
+        /* ==========================================================================
+           9. DYNAMIC SPEECH RECOGNITION (MATCHES SPOKEN FLASHCARD WORD INSTANTLY)
+           ========================================================================== */
+        function listenToPupil() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const btnText = document.getElementById('listenBtnText');
+
+            if (!SpeechRecognition) {
+                // Fallback prompt for browsers without speech API
+                const userPrompt = prompt("Type any flashcard word (e.g., cat, dog, sun, box, van, bed, pen, cup, jam, pig):");
+                if (userPrompt) {
+                    handleSpokenTranscript(userPrompt);
+                }
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+
+            btnText.innerText = 'Listening... Say Flashcard Word!';
+
+            recognition.onresult = (event) => {
+                const spokenRaw = event.results[0][0].transcript;
+                handleSpokenTranscript(spokenRaw);
+            };
+
+            recognition.onerror = () => {
+                btnText.innerText = 'Could not hear clearly. Try speaking again!';
+                setTimeout(() => { btnText.innerText = 'Practice Speaking (Say Flashcard Word!)'; }, 2000);
+            };
+
+            recognition.start();
+        }
+
+        function handleSpokenTranscript(rawText) {
+            const btnText = document.getElementById('listenBtnText');
+            const cleaned = rawText.trim().toUpperCase();
+            
+            // Search masterWordList for a match with what student spoke
+            let matchedIndex = -1;
+            matchedIndex = masterWordList.findIndex(w => cleaned.includes(w.spelled) || w.spelled.includes(cleaned));
+
+            if (matchedIndex !== -1) {
+                const matchedItem = masterWordList[matchedIndex];
+                selectCurrentGameWord(matchedIndex);
+                btnText.innerText = `Recognized "${matchedItem.spelled}"! ✨ Card Changed!`;
+                speakCurrentWord();
+
+                // Show Toast Notification acknowledging spoken word
+                const toast = document.getElementById('gameToast');
+                const toastIcon = document.getElementById('toastIcon');
+                const toastTitle = document.getElementById('toastTitle');
+                const toastMsg = document.getElementById('toastMsg');
+
+                toast.classList.remove('hidden');
+                toastIcon.innerText = matchedItem.icon;
+                toastIcon.className = 'w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center text-xl font-bold';
+                toastTitle.innerText = `Spoken Word Recognized: "${matchedItem.spelled}"!`;
+                toastMsg.innerText = `Card updated to ${matchedItem.spelled} (ending sound /${matchedItem.phonemeKey}/). Now sort it into Freeze or Melt!`;
+
+            } else {
+                btnText.innerText = `Heard "${cleaned}" (Not a Flashcard Word)`;
+                setTimeout(() => { btnText.innerText = 'Practice Speaking (Say Flashcard Word!)'; }, 2500);
+            }
+        }
+    </script>
+</body>
+</html>
